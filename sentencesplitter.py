@@ -1,46 +1,25 @@
+'''Module to define functions required to tokenize any language in the world.
+
+'''
+
 import nltk
 import csv
+from collections import namedtuple
+#TODO
+# Convert the file data into static hardcode data in the end.
+
+
+
 #The sentence splitter, will split the given text, in sentences using Punkt Tokenizer. 
 
-#Testone, train on english corpus which we already have.
-#print 'Andar ka printing this is'
-#eng = open('two bullocks','rb')
-#print type(eng)
+Lang  = namedtuple('Lang',['codename','language', 'need_punkt','stopchar'])
 
-
-#count = 0
-
-
-
-# sentences = []
-# text_eng = eng.read()
-# #We need to omit the \n
-# sent_detector = nltk.data.load('tokenizers/punkt/english.pickle')
-# sentences = (sent_detector.tokenize(text_eng.strip()))
-
-#print sentences
-
-# for sentence in sentences:
-# 	print sentence
-# 	co
-# unt = count + 1
-
-#print count
-
-# eng.close()
-
-class Lang:
-
-	stopchar = []
-	#need_punkt is True or False
-	def __init__(self, codename, language, need_punkt, stopchar):
-		self.need_punkt = need_punkt
-		self.stopchar = stopchar
-		self.language = language
-		self.langcode = codename
 
 def get_lang_info(lang):
-	#Syntax of the csv, langname(fullname), need_punkt, stopchar list which is comma separated.
+	'''Reads langinfo.csv and returns information about the particular language as a namedtuple
+
+	Returns in order : codename, language, need_punkt, stopcharlist(unicode)
+	'''
 	langinfolist = []
 	with open("langinfo.csv",'rb') as f:
 		c = csv.reader(f,delimiter = '\t')
@@ -51,23 +30,23 @@ def get_lang_info(lang):
 	
 
 
-	return 	Lang(lang, langinfolist[1].decode('utf-8'), bool(langinfolist[2]), langinfolist[3].decode('utf-8').split(u','))		
+	return 	Lang(lang, langinfolist[1].decode('utf-8'), langinfolist[2]=='True', langinfolist[3].decode('utf-8').split(u','))		
 
 def splitter(text,lang):
-	#The function assumes that unicode text is being given. CHECK IF PUNKT USES UNICODE
-	#returns a list of sentences with their fullstops
+	'''Tokenizes the text(unicode) in any specified language and returns as a list of unicode sentences
+
+	Checks whether a language requires the usage of Punkt Tokenizer from hardcoded data about languages. If not, simply splits and returns.
+	'''
 	
-	thislang = get_lang_info('eng')
-	print thislang.need_punkt
+	thislang = get_lang_info(lang)
+	
 	if thislang.need_punkt:
-		#for now it is enlgish pickle, but we will use the respective languages pickle from the downloaded pickles
-				
-		# sent_detector = nltk.data.load('tokenizers/punkt/english.pickle')
-		
 		sent_detector = nltk.data.load('tokenizers/punkt/%s.pickle'%(thislang.language))
 		sentences = (sent_detector.tokenize(text.strip()))		
 		return sentences
 	else:
-
 		return lang.split(thislang.stopchar[0])	
 
+
+# print get_lang_info('eng')
+# print splitter('hello. what the fuck in goig. Mr. what?','eng')
